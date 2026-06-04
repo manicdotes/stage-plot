@@ -71,10 +71,25 @@
     body{background:#fff;}
     .no-print{display:none!important;}
     .wrap{max-width:none;padding:0;}
-    .row,.chip{break-inside:avoid;}
-    .head{margin-bottom:12px;}
-    .rows{gap:7px;}
     @page{size:letter portrait;margin:0.5in;}
+
+    /* compact, fixed sizing so all 7 channels + notes fit one page */
+    .head{margin-bottom:10px;padding-bottom:7px;border-bottom-width:3px;}
+    .head .band{font-size:26px;}
+    .head .sub{font-size:12px;margin-top:4px;}
+
+    .rows{gap:6px;}
+    .row,.chip{break-inside:avoid;}
+    .row{padding:8px 14px;gap:16px;border-width:1.5px;border-radius:10px;}
+    .num{width:40px;height:40px;font-size:21px;}
+    .label .name{font-size:21px;}
+    .label .src{font-size:11px;margin-top:2px;}
+    .lvl{font-size:13px;padding:5px 13px;}
+    .row.drums .num{font-size:18px;}
+    .row.drums .name{font-size:16px;}
+
+    .notes{margin-top:10px;padding-top:9px;gap:6px;}
+    .chip{font-size:10.5px;padding:5px 10px;}
   }
 </style>
 </head>
