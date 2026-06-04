@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>manicdotes — FOH Input List</title>
+<style>
+  :root{
+    --ink:#15171c; --muted:#5b6170; --line:#d7dbe4;
+    --vox:#1f6feb; --gtr:#188a5b; --bg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%;}
+  .wrap{max-width:1000px;margin:0 auto;padding:clamp(14px,3vw,28px);}
+
+  /* ---------- top bar (screen only) ---------- */
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    margin-bottom:clamp(10px,2vw,18px);flex-wrap:wrap;}
+  .bar a,.bar button{font:inherit;font-weight:700;font-size:15px;cursor:pointer;
+    border-radius:9px;padding:11px 18px;text-decoration:none;border:0;
+    display:inline-flex;align-items:center;gap:8px;}
+  .bar a.back{background:#fff;color:var(--ink);border:1.5px solid var(--ink);}
+  .bar button{background:var(--ink);color:#fff;}
+  .bar a.back:hover{background:#eef1f7;}
+  .bar button:hover{background:#000;}
+  .bar svg{width:18px;height:18px;}
+
+  /* ---------- title ---------- */
+  .head{border-bottom:4px solid var(--ink);padding-bottom:10px;margin-bottom:clamp(10px,2vw,18px);}
+  .head .band{font-size:clamp(28px,6vw,48px);font-weight:800;letter-spacing:-1px;line-height:1;}
+  .head .sub{font-size:clamp(13px,2.4vw,18px);font-weight:800;letter-spacing:3px;
+    color:var(--muted);margin-top:6px;}
+
+  /* ---------- channel rows ---------- */
+  .rows{display:flex;flex-direction:column;gap:clamp(8px,1.4vw,12px);}
+  .row{display:flex;align-items:center;gap:clamp(12px,2.4vw,22px);
+    border:2px solid var(--line);border-radius:14px;padding:clamp(10px,2vw,16px) clamp(12px,2.4vw,22px);
+    background:#fff;}
+  .num{flex:0 0 auto;width:clamp(46px,9vw,68px);height:clamp(46px,9vw,68px);
+    border-radius:50%;background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:clamp(24px,5vw,38px);font-weight:800;}
+  .label{flex:1 1 auto;min-width:0;}
+  .label .name{font-size:clamp(22px,5vw,40px);font-weight:800;line-height:1;letter-spacing:-.5px;}
+  .label .src{font-size:clamp(12px,2.4vw,18px);color:var(--muted);font-weight:600;margin-top:4px;}
+  .lvl{flex:0 0 auto;font-size:clamp(14px,2.8vw,22px);font-weight:800;letter-spacing:1px;
+    padding:clamp(7px,1.4vw,12px) clamp(12px,2.4vw,20px);border-radius:30px;}
+  .lvl.mic{background:#e7f0ff;color:var(--vox);}
+  .lvl.line{background:#e7f7ee;color:var(--gtr);}
+
+  /* drums note row */
+  .row.drums{border-style:dashed;background:#fafbfd;}
+  .row.drums .num{background:#fff;color:var(--muted);border:2px dashed var(--line);font-size:clamp(20px,4vw,30px);}
+  .row.drums .name{font-size:clamp(16px,3.4vw,26px);color:var(--ink);}
+
+  /* ---------- quick notes strip ---------- */
+  .notes{margin-top:clamp(14px,2.6vw,22px);border-top:2px solid var(--line);padding-top:clamp(12px,2vw,16px);
+    display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{font-size:clamp(12px,2.4vw,16px);font-weight:700;background:#fff;border:1.5px solid var(--line);
+    border-radius:30px;padding:8px 14px;display:inline-flex;align-items:center;gap:7px;}
+  .chip b{color:var(--ink);}
+  .chip .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .chip .dot.mic{background:var(--vox);}
+  .chip .dot.line{background:var(--gtr);}
+  .chip .dot.warn{background:#d4860b;}
+  .chip .dot.ink{background:var(--ink);}
+
+  @media print{
+    body{background:#fff;}
+    .no-print{display:none!important;}
+    .wrap{max-width:none;padding:0;}
+    .row,.chip{break-inside:avoid;}
+    .head{margin-bottom:12px;}
+    .rows{gap:7px;}
+    @page{size:letter portrait;margin:0.5in;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar no-print">
+    <a class="back" href="index.html" title="Back to the full stage plot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#15171c" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Stage Plot
+    </a>
+    <button onclick="window.print()" title="Print or save this page as a PDF">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/></svg>
+      Print / Save PDF
+    </button>
+  </div>
+
+  <div class="head">
+    <div class="band">manicdotes</div>
+    <div class="sub">FOH INPUT LIST · 7-CHANNEL SNAKE</div>
+  </div>
+
+  <div class="rows">
+    <div class="row"><div class="num">1</div><div class="label"><div class="name">VOX RIGHT</div><div class="src">Rob · stage right</div></div><div class="lvl mic">MIC</div></div>
+    <div class="row"><div class="num">2</div><div class="label"><div class="name">VOX LEFT</div><div class="src">Justin · stage left</div></div><div class="lvl mic">MIC</div></div>
+    <div class="row"><div class="num">3</div><div class="label"><div class="name">VOX CENTER</div><div class="src">Steve · center</div></div><div class="lvl mic">MIC</div></div>
+    <div class="row"><div class="num">4</div><div class="label"><div class="name">VOX REAR</div><div class="src">Seth · drums</div></div><div class="lvl mic">MIC</div></div>
+    <div class="row"><div class="num">5</div><div class="label"><div class="name">GUITAR RIGHT</div><div class="src">Rob · HX Stomp (ampless)</div></div><div class="lvl line">LINE</div></div>
+    <div class="row"><div class="num">6</div><div class="label"><div class="name">GUITAR LEFT</div><div class="src">Justin · HX Stomp (ampless)</div></div><div class="lvl line">LINE</div></div>
+    <div class="row"><div class="num">7</div><div class="label"><div class="name">BASS</div><div class="src">Steve · HX Stomp (ampless)</div></div><div class="lvl line">LINE</div></div>
+    <div class="row drums"><div class="num">+</div><div class="label"><div class="name">DRUMS — FOH mics</div><div class="src">Engineer's discretion · FOH only · NOT in our snake</div></div></div>
+  </div>
+
+  <div class="notes">
+    <span class="chip"><span class="dot mic"></span><b>Ch 1–4</b> = mic level</span>
+    <span class="chip"><span class="dot line"></span><b>Ch 5–7</b> = line level</span>
+    <span class="chip"><span class="dot ink"></span><b>Ampless</b> — no cabs to mic</span>
+    <span class="chip"><span class="dot ink"></span><b>In-ears</b> — no wedges needed</span>
+    <span class="chip"><span class="dot warn"></span>Drum "trash mic" stays in our IEMs — <b>not to FOH</b></span>
+  </div>
+
+</div>
+</body>
+</html>

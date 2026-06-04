@@ -1,0 +1,5 @@
+# Brainstorming visual-companion scratch dir (local only)
+.superpowers/
+
+# OS / editor cruft
+.DS_Store

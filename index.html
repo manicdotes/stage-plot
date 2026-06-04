@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>manicdotes — Stage Plot</title>
+<style>
+  :root{
+    --ink:#15171c; --muted:#5b6170; --line:#c9ced9; --line2:#e4e7ee;
+    --stage:#f6f7fb; --accent:#1f6feb; --warn:#d4860b; --cab:#7a5cff;
+    --vox:#1f6feb; --gtr:#188a5b; --bass:#b4456b; --drum:#444a57;
+    --chip:#eef1f7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#5a5f6b;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+
+  /* ---------- toolbar (screen only) ---------- */
+  .toolbar{max-width:8.5in;margin:18px auto 0;padding:0 0.5in;
+    display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .toolbar button,.toolbar a{font:inherit;font-size:13px;font-weight:700;cursor:pointer;
+    border:0;border-radius:8px;padding:10px 16px;text-decoration:none;
+    display:inline-flex;align-items:center;gap:7px;}
+  .toolbar button{background:var(--ink);color:#fff;}
+  .toolbar a.btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--ink);}
+  .toolbar button:hover{background:#000;}
+  .toolbar a.btn-ghost:hover{background:#f0f2f7;}
+  .toolbar svg{width:16px;height:16px;}
+
+  .sheet{
+    width:8.5in;min-height:11in;margin:14px auto 18px;background:#fff;
+    padding:0.45in 0.5in 0.4in;box-shadow:0 8px 40px rgba(0,0,0,.35);
+  }
+  /* ---------- header ---------- */
+  header{display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:3px solid var(--ink);padding-bottom:8px;}
+  .band{font-size:34px;font-weight:800;letter-spacing:-.5px;line-height:1;}
+  .band small{display:block;font-size:12px;font-weight:700;letter-spacing:3px;
+    color:var(--muted);margin-top:5px;}
+  .meta{text-align:right;font-size:11px;color:var(--muted);line-height:1.5;}
+  .meta b{color:var(--ink);}
+
+  /* ---------- stage ---------- */
+  .stage-wrap{margin-top:14px;}
+  .stage{
+    position:relative;width:100%;height:4.35in;background:var(--stage);
+    border:2px solid var(--ink);border-radius:6px;overflow:hidden;
+  }
+  .edge{position:absolute;left:0;right:0;text-align:center;font-size:10px;
+    font-weight:800;letter-spacing:3px;color:var(--muted);}
+  .edge.top{top:6px;}
+  .edge.bot{bottom:6px;color:var(--ink);}
+  .edge.bot span{background:var(--ink);color:#fff;padding:3px 10px;border-radius:3px;letter-spacing:2px;}
+
+  .pos{position:absolute;transform:translate(-50%,-50%);width:118px;text-align:center;}
+  .node{
+    background:#fff;border:2px solid var(--line);border-radius:9px;padding:7px 6px 6px;
+    box-shadow:0 1px 0 rgba(0,0,0,.04);
+  }
+  .node .icon{height:24px;display:flex;align-items:center;justify-content:center;}
+  .node .icon svg{width:24px;height:24px;}
+  .node .who{font-weight:800;font-size:13px;margin-top:3px;}
+  .node .role{font-size:9.5px;color:var(--muted);margin-top:1px;letter-spacing:.2px;}
+  .tags{display:flex;gap:3px;justify-content:center;margin-top:5px;flex-wrap:wrap;}
+  .tag{font-size:8px;font-weight:800;letter-spacing:.4px;padding:2px 5px;border-radius:20px;
+    background:var(--chip);color:var(--muted);text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:3px;}
+  .tag svg{width:9px;height:9px;}
+  .tag.mic{background:#e7f0ff;color:var(--vox);}
+  .tag.pwr{background:#fdf2e0;color:var(--warn);}
+  .tag.pwr svg{fill:var(--warn);}
+  .node.vox{border-color:var(--vox);}
+  .node.vox .icon{color:var(--gtr);}
+  .node.bass{border-color:var(--bass);}
+  .node.bass .icon{color:var(--bass);}
+  .node.drum{border-color:var(--drum);}
+  .node.drum .icon{color:var(--drum);}
+
+  .small{width:96px;}
+  .cab .node{border-color:var(--cab);border-style:dashed;background:#f7f5ff;}
+  .cab .node .icon{color:var(--cab);}
+  .cab .who{font-size:12px;color:var(--cab);}
+  .mixer .node{border-color:var(--ink);background:#fffdf3;}
+  .mixer .node .icon{color:var(--ink);}
+  .mixer .who{font-size:12px;}
+
+  /* snake arrow */
+  .snake{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;}
+  .snake .lbl{font-size:9px;font-weight:800;letter-spacing:1px;color:var(--ink);
+    background:#fff;border:1.5px solid var(--ink);border-radius:4px;padding:2px 7px;margin-bottom:2px;}
+
+  /* ---------- legend ---------- */
+  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:9px;font-size:10px;color:var(--muted);align-items:center;}
+  .legend b{color:var(--ink);}
+  .legend .li{display:inline-flex;align-items:center;gap:5px;}
+  .legend svg{width:15px;height:15px;}
+
+  /* ---------- lower ---------- */
+  .lower{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-top:14px;}
+  h2{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);
+    margin:0 0 6px;border-bottom:2px solid var(--ink);padding-bottom:3px;}
+  table{width:100%;border-collapse:collapse;font-size:10.5px;}
+  th,td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line2);}
+  th{font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+    border-bottom:1.5px solid var(--line);}
+  td.ch{font-weight:800;width:26px;color:var(--accent);}
+  .lvl{font-size:8px;font-weight:800;padding:2px 6px;border-radius:20px;}
+  .lvl.mic{background:#e7f0ff;color:var(--vox);}
+  .lvl.line{background:#e7f7ee;color:var(--gtr);}
+  tr.drumrow td{background:#fafbfd;color:var(--muted);font-style:italic;border-bottom:none;}
+
+  /* clickable input-list block (screen) */
+  a.ilist{display:block;text-decoration:none;color:inherit;border-radius:8px;
+    margin:-6px;padding:6px;transition:background .15s;}
+  a.ilist:hover{background:#f3f6fc;}
+  .ilist-hint{font-size:9px;font-weight:800;color:var(--accent);letter-spacing:.6px;
+    text-transform:uppercase;margin-top:7px;display:inline-flex;align-items:center;gap:4px;}
+  .ilist-hint svg{width:11px;height:11px;}
+
+  .notes ul{margin:0;padding-left:16px;font-size:10.5px;line-height:1.55;}
+  .notes li{margin-bottom:4px;}
+  .notes li b{color:var(--ink);}
+  .pill{display:inline-block;background:var(--ink);color:#fff;font-size:8px;font-weight:800;
+    letter-spacing:.5px;padding:1px 6px;border-radius:20px;vertical-align:middle;}
+
+  footer{margin-top:12px;border-top:1px solid var(--line);padding-top:6px;
+    font-size:9px;color:var(--muted);display:flex;justify-content:space-between;}
+
+  @media print{
+    body{background:#fff;}
+    .no-print,.ilist-hint{display:none!important;}
+    .sheet{box-shadow:none;margin:0;width:auto;min-height:auto;}
+    a.ilist{margin:0;padding:0;}
+    a.ilist:hover{background:none;}
+    @page{size:letter portrait;margin:0.4in;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <button onclick="window.print()" title="Print or save this page as a PDF">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/></svg>
+    Print / Save PDF
+  </button>
+  <a class="btn-ghost" href="inputs.html" title="Open the large full-screen input list">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#15171c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4"/><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M15 21h4a2 2 0 0 0 2-2v-4"/></svg>
+    Full-screen Input List
+  </a>
+</div>
+
+<div class="sheet">
+
+  <header>
+    <div class="band">manicdotes<small>STAGE PLOT &amp; INPUT LIST</small></div>
+    <div class="meta">
+      4-piece · ampless · in-ear monitors<br>
+      Contact: <b>info@manicdotes.com</b><br>
+      Rev. 2026-06-04
+    </div>
+  </header>
+
+  <div class="stage-wrap">
+    <div class="stage">
+      <div class="edge top">▲ UPSTAGE / BACK OF STAGE</div>
+
+      <!-- rear: drums centered + mixer right beside -->
+      <div class="pos drum" style="left:48%;top:20%;">
+        <div class="node drum">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="11" cy="15" rx="7" ry="3"/><path d="M4 15v3c0 1.7 3.1 3 7 3s7-1.3 7-3v-3"/><line x1="11" y1="12" x2="11" y2="5"/><line x1="6.5" y1="13.5" x2="3.5" y2="8"/><line x1="15.5" y1="13.5" x2="20" y2="7"/><ellipse cx="20" cy="6" rx="3" ry="1"/></svg></div>
+          <div class="who">SETH</div>
+          <div class="role">Drums + Vox</div>
+          <div class="tags"><span class="tag mic">VOX</span><span class="tag pwr"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>PWR</span></div>
+        </div>
+      </div>
+
+      <div class="pos mixer small" style="left:75%;top:19%;">
+        <div class="node mixer">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/><rect x="5.5" y="10.2" width="3" height="2.2" rx=".5" fill="currentColor" stroke="none"/><rect x="10.5" y="12.4" width="3" height="2.2" rx=".5" fill="currentColor" stroke="none"/><rect x="15.5" y="9.2" width="3" height="2.2" rx=".5" fill="currentColor" stroke="none"/></svg></div>
+          <div class="who">BAND MIXER<br>+ IEM RACK</div>
+          <div class="tags"><span class="tag pwr"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>PWR</span></div>
+        </div>
+      </div>
+
+      <!-- powered cabs behind guitarists -->
+      <div class="pos cab small" style="left:20%;top:48%;">
+        <div class="node cab">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="14.5" r="3.5"/><circle cx="12" cy="6.5" r="1.3"/></svg></div>
+          <div class="who">POWERED CAB</div>
+          <div class="tags"><span class="tag pwr"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>PWR</span></div>
+        </div>
+      </div>
+      <div class="pos cab small" style="left:80%;top:48%;">
+        <div class="node cab">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="14.5" r="3.5"/><circle cx="12" cy="6.5" r="1.3"/></svg></div>
+          <div class="who">POWERED CAB</div>
+          <div class="tags"><span class="tag pwr"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>PWR</span></div>
+        </div>
+      </div>
+
+      <!-- front line -->
+      <div class="pos" style="left:18%;top:80%;">
+        <div class="node vox">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="16.5" r="4.5"/><line x1="10.7" y1="13.3" x2="19" y2="5"/><path d="M18.2 4.2l1.6 1.6"/><path d="M19 3l2 2-1.2 1.2-2-2z"/></svg></div>
+          <div class="who">ROB</div>
+          <div class="role">Elec. Guitar + Vox</div>
+          <div class="role" style="color:var(--gtr);font-weight:700;">STAGE RIGHT</div>
+          <div class="tags"><span class="tag mic">VOX</span><span class="tag pwr"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>PWR</span></div>
+        </div>
+      </div>
+      <div class="pos" style="left:50%;top:80%;">
+        <div class="node bass">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="16.5" r="4.5"/><line x1="10.7" y1="13.3" x2="19" y2="5"/><path d="M18.2 4.2l1.6 1.6"/><path d="M19 3l2 2-1.2 1.2-2-2z"/></svg></div>
+          <div class="who">STEVE</div>
+          <div class="role">Bass + Vox</div>
+          <div class="role" style="color:var(--bass);font-weight:700;">CENTER</div>
+          <div class="tags"><span class="tag mic">VOX</span><span class="tag pwr"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>PWR</span></div>
+        </div>
+      </div>
+      <div class="pos" style="left:82%;top:80%;">
+        <div class="node vox">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="16.5" r="4.5"/><line x1="10.7" y1="13.3" x2="19" y2="5"/><path d="M18.2 4.2l1.6 1.6"/><path d="M19 3l2 2-1.2 1.2-2-2z"/></svg></div>
+          <div class="who">JUSTIN</div>
+          <div class="role">Elec. Guitar + Vox</div>
+          <div class="role" style="color:var(--gtr);font-weight:700;">STAGE LEFT</div>
+          <div class="tags"><span class="tag mic">VOX</span><span class="tag pwr"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>PWR</span></div>
+        </div>
+      </div>
+
+      <div class="snake">
+        <div class="lbl">↓ 7-CH XLR SNAKE → FOH</div>
+      </div>
+      <div class="edge bot"><span>DOWNSTAGE — AUDIENCE / FOH</span></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="li"><svg viewBox="0 0 24 24" fill="none" stroke="#15171c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg><span>Band mixer + <b>in-ear monitor</b> rack</span></span>
+    <span class="li"><svg viewBox="0 0 24 24" fill="none" stroke="#7a5cff" stroke-width="1.6"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="14.5" r="3.5"/><circle cx="12" cy="6.5" r="1.3"/></svg><span>Powered cab (<b>power only</b> — fed from band mixer)</span></span>
+    <span class="li"><svg viewBox="0 0 24 24" fill="#d4860b" stroke="none"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg><span>Wall / edison power drop requested</span></span>
+    <span>* <b>FOH mics drum kit at engineer's discretion</b></span>
+  </div>
+
+  <div class="lower">
+    <a class="ilist" href="inputs.html" title="Open the large full-screen input list">
+      <h2>FOH Input List — 7-Channel Snake</h2>
+      <table>
+        <thead><tr><th>Ch</th><th>Label</th><th>Source</th><th>Level</th></tr></thead>
+        <tbody>
+          <tr><td class="ch">1</td><td>VOX RIGHT</td><td>Rob (stage right)</td><td><span class="lvl mic">MIC</span></td></tr>
+          <tr><td class="ch">2</td><td>VOX LEFT</td><td>Justin (stage left)</td><td><span class="lvl mic">MIC</span></td></tr>
+          <tr><td class="ch">3</td><td>VOX CENTER</td><td>Steve (center)</td><td><span class="lvl mic">MIC</span></td></tr>
+          <tr><td class="ch">4</td><td>VOX REAR</td><td>Seth (drums)</td><td><span class="lvl mic">MIC</span></td></tr>
+          <tr><td class="ch">5</td><td>GUITAR RIGHT</td><td>Rob — HX Stomp</td><td><span class="lvl line">LINE</span></td></tr>
+          <tr><td class="ch">6</td><td>GUITAR LEFT</td><td>Justin — HX Stomp</td><td><span class="lvl line">LINE</span></td></tr>
+          <tr><td class="ch">7</td><td>BASS</td><td>Steve — HX Stomp</td><td><span class="lvl line">LINE</span></td></tr>
+          <tr class="drumrow"><td>—</td><td colspan="3">Drums: FOH mics at engineer's discretion (FOH only — not in our snake)</td></tr>
+        </tbody>
+      </table>
+      <span class="ilist-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4"/><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M9 21H5a2 2 0 0 1-2-2v-4"/><path d="M15 21h4a2 2 0 0 0 2-2v-4"/></svg>Tap for full-screen view (easy reading at changeover)</span>
+    </a>
+
+    <div class="notes">
+      <h2>Tech Notes for FOH</h2>
+      <ul>
+        <li><b>We are fully ampless.</b> Guitars &amp; bass run HX Stomp modelers — no backline, no cabinets to mic.</li>
+        <li><b>We bring our own mixer.</b> You receive a single <b>7-channel XLR snake</b> (channels at left). Ch 1–4 are <b>mic level</b>, Ch 5–7 are <b>line level</b>.</li>
+        <li><b>In-ear monitors — no stage wedges or monitor mixes needed</b> from FOH. <span class="pill">0 MONITORS</span></li>
+        <li><b>Drums:</b> please mic the kit for FOH at your discretion. Our internal drum "trash mic" stays in our IEMs and does <b>not</b> come to FOH.</li>
+        <li><b>Powered cabs</b> behind Rob &amp; Justin are fed from our mixer — <b>power only</b>, nothing for FOH to do.</li>
+        <li><b>Power:</b> one standard wall/edison drop at each of the 4 positions, plus the 2 powered cabs.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <span>manicdotes — stage plot</span>
+    <span>Stage directions are from the performers' perspective facing the audience.</span>
+  </footer>
+
+</div>
+</body>
+</html>
