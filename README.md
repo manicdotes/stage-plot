@@ -2,7 +2,9 @@
 
 Live stage plot, input list, and FOH tech notes for **manicdotes**, hosted on GitHub Pages.
 
-**Live site:** https://manicdotes.github.io/stage-plot/
+**Live site:** https://stage-plot.manicdotes.com/
+
+(The `https://manicdotes.github.io/stage-plot/` URL redirects here to the custom domain.)
 
 ## Pages
 
